@@ -184,7 +184,7 @@ public class music extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int i, long l) {
                 String songName=myListViewForSongs.getItemAtPosition(i).toString();
-                startActivity(new Intent(context, musicPlayer.class).putExtra("songs",mysongs).putExtra("songname",songName).putExtra("pos",i));
+                startActivity(new Intent(context, MusicPlayerFixed.class).putExtra("songs",mysongs).putExtra("songname",songName).putExtra("pos",i));
             }
         });
 

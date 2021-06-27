@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">FinalApplication</string>
+    <string name="app_name">Drivo</string>
+    <string name="google_places_key">AIzaSyDDYoqzQg20mlp4QZzDueT7gjw_IQ4DHow</string>
 </resources>

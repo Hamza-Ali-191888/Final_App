@@ -5,6 +5,7 @@ import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -41,10 +42,13 @@ public class musicPlayer extends AppCompatActivity {
 
         //to keep updating seekbar regularly
         updateseekBar= new Thread(){
+            int done;
+
             @Override
             public void run() {
                 int totalDuration= myMediaPlayer.getDuration();
                 int currentPosition=0;
+                done = 3;
                 while (currentPosition < totalDuration){
                     try {
                         sleep(500);
@@ -53,8 +57,14 @@ public class musicPlayer extends AppCompatActivity {
                     }
                     catch (InterruptedException e){
                         e.printStackTrace();
+                        break;
                     }
                 }
+            }
+
+            public void setRun()
+            {
+                done = 4;
             }
         };
         if(myMediaPlayer!= null){
@@ -84,6 +94,42 @@ public class musicPlayer extends AppCompatActivity {
         // to sync seekbar with music
         songSeekbar.setMax(myMediaPlayer.getDuration());
         updateseekBar.start();
+
+        myMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                updateseekBar.interrupt();
+                songSeekbar.setProgress(0);
+                myMediaPlayer.stop();
+                myMediaPlayer.release();
+                position = ((position+1)%mySongs.size());
+                Uri u=Uri.parse(mySongs.get(position).toString());
+                myMediaPlayer=MediaPlayer.create(getApplicationContext(),u);
+                sname=mySongs.get(position).getName().toString();
+                songTextLabel.setText(sname);
+                myMediaPlayer.start();
+                songSeekbar.setMax(myMediaPlayer.getDuration());
+                updateseekBar = new Thread(){
+                    @Override
+                    public void run() {
+                        int totalDuration= myMediaPlayer.getDuration();
+                        int currentPosition=0;
+                        while (currentPosition < totalDuration){
+                            try {
+                                sleep(500);
+                                currentPosition=myMediaPlayer.getCurrentPosition();
+                                songSeekbar.setProgress(currentPosition);
+                            }
+                            catch (InterruptedException e){
+                                e.printStackTrace();
+                                break;
+                            }
+                        }
+                    }
+                };
+                updateseekBar.start();
+            }
+        });
 
         songSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -126,6 +172,8 @@ public class musicPlayer extends AppCompatActivity {
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                updateseekBar.interrupt();
+                songSeekbar.setProgress(0);
                 myMediaPlayer.stop();
                 myMediaPlayer.release();
                 position = ((position+1)%mySongs.size());
@@ -134,6 +182,8 @@ public class musicPlayer extends AppCompatActivity {
                 sname=mySongs.get(position).getName().toString();
                 songTextLabel.setText(sname);
                 myMediaPlayer.start();
+                songSeekbar.setMax(myMediaPlayer.getDuration());
+                updateseekBar.start();
             }
         });
 
